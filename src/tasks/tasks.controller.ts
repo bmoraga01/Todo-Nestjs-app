@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
 
 @Controller('boards/:id/tasks')
 export class TasksController {
@@ -22,13 +24,22 @@ export class TasksController {
   }
 
   @Get()
-  findAll() {
-    return this.tasksService.findAll();
+  @UseGuards(AuthGuard('jwt'))
+  findAll(
+    @Req() req: Request & { user: { id: string } },
+    @Param('id') boardId: string
+  ) {
+    return this.tasksService.findAll(req.user.id, boardId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tasksService.findOne(+id);
+  @UseGuards(AuthGuard('jwt'))
+  findOne(
+    @Req() req: Request & { user: { id: string } },
+    @Param('id') boardId: string,
+    @Param('taskId') taskId: string
+  ) {
+    return this.tasksService.findOne(boardId, taskId);
   }
 
   @Patch(':id')

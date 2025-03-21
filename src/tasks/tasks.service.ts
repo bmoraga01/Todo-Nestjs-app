@@ -1,19 +1,43 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TasksService {
+
+  constructor(
+    private prisma: PrismaService
+  ) {}
+
   create(createTaskDto: CreateTaskDto) {
     return 'This action adds a new task';
   }
 
-  findAll() {
-    return `This action returns all tasks`;
+  async findAll(userId: string, boardId: string) {
+
+    const tasks = await this.prisma.task.findMany({
+      where: { boardId }
+    })
+
+    if (!tasks.length) {
+      throw new NotFoundException('No tienes tareas creadas')
+    }
+
+    return tasks;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} task`;
+  async findOne(boardId: string, taskId: string) {
+
+    const task = await this.prisma.task.findFirst({
+      where: { id: taskId, boardId }
+    })
+
+    if (!task) {
+      throw new NotFoundException('Tarea no encontrada')
+    }
+
+    return task
   }
 
   update(id: number, updateTaskDto: UpdateTaskDto) {

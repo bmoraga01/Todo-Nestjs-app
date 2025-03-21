@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Req, Put } from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
@@ -10,8 +10,9 @@ export class BoardsController {
   constructor(private readonly boardsService: BoardsService) {}
 
   @Post()
-  create(@Body() createBoardDto: CreateBoardDto) {
-    return this.boardsService.create(createBoardDto);
+  @UseGuards(AuthGuard('jwt'))
+  create(@Req() req: Request & { user: { id: string } }, @Body() createBoardDto: CreateBoardDto) {
+    return this.boardsService.create(req.user.id, createBoardDto);
   }
 
   @Get()
@@ -26,13 +27,17 @@ export class BoardsController {
     return this.boardsService.findOne(req.user.id, id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBoardDto: UpdateBoardDto) {
-    return this.boardsService.update(+id, updateBoardDto);
+  @Put(':id')
+  @UseGuards(AuthGuard('jwt'))
+  update(
+    @Req() req: Request & { user: { id: string } }, @Param('id') id: string, @Body() updateBoardDto: UpdateBoardDto
+  ) {
+    return this.boardsService.update(req.user.id, id, updateBoardDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.boardsService.remove(+id);
+  @UseGuards(AuthGuard('jwt'))
+  remove(@Req() req: Request & { user: { id: string } }, @Param('id') id: string) {
+    return this.boardsService.remove(req.user.id, id);
   }
 }

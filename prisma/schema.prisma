@@ -29,7 +29,6 @@ model User {
 }
 
 enum BoardState {
-  PENDING
   TODO
   IN_PROGRESS
   DONE
@@ -39,7 +38,7 @@ enum BoardState {
 model Board {
   id        String     @id @default(uuid())
   name      String
-  state     BoardState @default(PENDING)
+  state     BoardState @default(TODO)
   createdBy String
   user      User       @relation(fields: [createdBy], references: [id])
   createdAt DateTime   @default(now())

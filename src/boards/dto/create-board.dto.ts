@@ -4,7 +4,4 @@ export class CreateBoardDto {
     @IsNotEmpty()
     @IsString()
     name: string
-
-    
-    state: string
 }
